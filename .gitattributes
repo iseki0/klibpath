@@ -1,0 +1,11 @@
+*.kt   text eol=lf
+*.kts  text eol=lf
+*.java text eol=lf
+*.sh   text eol=lf
+*.bat  text eol=crlf
+*.properties text eol=lf
+gradlew text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.md text eol=lf
+

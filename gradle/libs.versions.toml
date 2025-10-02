@@ -1,0 +1,11 @@
+[versions]
+kotlin = "2.2.20"
+kotlinx-serialization-lib = "1.9.0"
+kotlinx-io = "0.8.0"
+
+[libraries]
+kotlin-multiplatform = { module = "org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin", version.ref = "kotlin" }
+kotlinx-serialization = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
+kotlinx-atomicfu = "org.jetbrains.kotlinx:atomicfu-gradle-plugin:0.29.0"
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-lib" }
+kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
