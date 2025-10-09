@@ -7,6 +7,7 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.reinterpret
 import kotlinx.cinterop.toKString
 import kotlinx.cinterop.value
+import platform.windows.ERROR_ACCESS_DENIED
 import platform.windows.ERROR_FILE_NOT_FOUND
 import platform.windows.ERROR_MUI_FILE_NOT_FOUND
 import platform.windows.ERROR_NOT_ENOUGH_MEMORY
@@ -42,9 +43,17 @@ internal fun formatErrorCode(code: UInt = GetLastError()): String {
     }
 }
 
-internal fun translateIOError(code: UInt = GetLastError(), file: String = ""): Throwable {
-    return when(code.toInt()){
-        ERROR_PATH_NOT_FOUND, ERROR_FILE_NOT_FOUND, ERROR_MUI_FILE_NOT_FOUND -> NoSuchFileException(file)
+internal fun translateIOError(code: UInt = GetLastError(), file: String? = null, other: String? = null): Throwable {
+    return when (code.toInt()) {
+        ERROR_PATH_NOT_FOUND,
+        ERROR_FILE_NOT_FOUND,
+        ERROR_MUI_FILE_NOT_FOUND,
+            -> NoSuchFileException(file, null, formatErrorCode(code))
+
+        ERROR_ACCESS_DENIED,
+        1314, // A required privilege is not held by the client.
+            -> AccessDeniedException(file, other, formatErrorCode(code))
+
         ERROR_NOT_ENOUGH_MEMORY -> OutOfMemoryError()
         ERROR_NOT_SUPPORTED -> UnsupportedOperationException(formatErrorCode(code))
         else -> IOException(formatErrorCode(code))
