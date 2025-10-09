@@ -36,7 +36,7 @@ import platform.windows.WCHARVar
 import kotlin.math.max
 
 internal class WindowsPath : Path {
-    private val value: String
+    internal val value: String
     override val isRoot: Boolean
 
     private constructor(value: String) {

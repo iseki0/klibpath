@@ -9,6 +9,14 @@ interface FileSystem {
     }
 
     interface DirEntryIterator : Iterator<DirEntry>, AutoCloseable
+
+    fun openDirectoryIterator(path: Path): DirEntryIterator
+
+    fun listDirectoryEntries(path: Path): List<DirEntry> {
+        openDirectoryIterator(path).use { iter ->
+            return iter.asSequence().toList()
+        }
+    }
 }
 
 expect val PlatformFileSystem: FileSystem
