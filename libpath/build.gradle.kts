@@ -32,14 +32,15 @@ plugins {
     applyDefaultHierarchyTemplate {
         common {
             group("nonJvm") {
-                group("native")
-            }
-            group("posix") {
-                group("apple")
-                group("linux")
-            }
-            group("windows") {
-                group("mingw")
+                group("native") {
+                    group("posix") {
+                        group("apple")
+                        group("linux")
+                    }
+                    group("windows") {
+                        group("mingw")
+                    }
+                }
             }
         }
     }
