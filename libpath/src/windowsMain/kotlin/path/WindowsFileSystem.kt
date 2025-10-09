@@ -5,7 +5,7 @@ package path
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.windows.GetLogicalDrives
 
-internal object WindowsFileSystem : FileSystem {
+internal data object WindowsFileSystem : FileSystem {
     override val separator: String get() = "\\"
     override val roots: List<Path>
         get() = run {
@@ -16,7 +16,5 @@ internal object WindowsFileSystem : FileSystem {
                 WindowsPath.of("""$ch:\""")
             }
         }
-
-
 }
 
