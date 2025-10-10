@@ -28,6 +28,7 @@ internal data object WindowsFileSystem : FileSystem {
     override val roots: List<Path>
         get() = run {
             var mask = GetLogicalDrives()
+            if (mask == 0u) throw translateIOError()
             List(mask.countOneBits()) {
                 val ch = 'A' + mask.takeLowestOneBit().countTrailingZeroBits()
                 mask = mask and mask.takeLowestOneBit().inv()
