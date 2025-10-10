@@ -9,8 +9,10 @@ import kotlinx.cinterop.alloc
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
+import platform.windows.DeleteFileW
 import platform.windows.ERROR_FILE_NOT_FOUND
 import platform.windows.ERROR_NO_MORE_FILES
+import platform.windows.FALSE
 import platform.windows.FindClose
 import platform.windows.FindFirstFileW
 import platform.windows.FindNextFileW
@@ -37,9 +39,22 @@ internal data object WindowsFileSystem : FileSystem {
         }
 
     override fun openDirectoryIterator(path: Path): FileSystem.DirEntryIterator {
-        val p = path as? WindowsPath ?: throw IllegalArgumentException("Only WindowsPath is supported: $path")
-        return WindowsDirIterator(p.value)
+        return WindowsDirIterator(path.win.value)
     }
+
+    override fun delete(path: Path, ignoreIfNotExists: Boolean) {
+        val p = path.win.value
+        if (DeleteFileW(p) == FALSE) {
+            try {
+                translateIOError(file = p)
+            } catch (e: NoSuchFileException) {
+                if (!ignoreIfNotExists) throw e
+            }
+        }
+    }
+
+    private val Path.win: WindowsPath
+        get() = this as? WindowsPath ?: throw IllegalArgumentException("Only WindowsPath is supported: $this")
 }
 
 internal class WindowsDirIterator : FileSystem.DirEntryIterator, AbstractIterator<FileSystem.DirEntry> {

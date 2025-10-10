@@ -17,6 +17,9 @@ interface FileSystem {
             return iter.asSequence().toList()
         }
     }
+
+    fun delete(path: Path, ignoreIfNotExists: Boolean = false)
+
 }
 
 expect val PlatformFileSystem: FileSystem
