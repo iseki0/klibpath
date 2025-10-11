@@ -272,6 +272,7 @@ internal data object WindowsPathUtil {
     }
 
     fun joinPath(base: CharSequence, other: CharSequence): String {
+        // todo: fix windows special root handling
         if (other.isEmpty()){
             return base as? String ?: base.toString()
         }
@@ -282,15 +283,5 @@ internal data object WindowsPathUtil {
         return if (base.endsWith('\\')) "$base$other" else "$base\\$other"
     }
 
-    fun isRoot(path: CharSequence): Boolean {
-        val props = PathProp.analyze(path)
-        return when {
-            props.isNoPath -> true
-            props.isAbs && props.isUNC -> path.length == props.start
-            props.isAbs && props.hasDosPrefix -> path.length == props.start + 1
-            props.isAbs -> path.length == 1 // only '\'
-            else -> false
-        }
-    }
 }
 
