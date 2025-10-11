@@ -272,15 +272,35 @@ internal data object WindowsPathUtil {
     }
 
     fun joinPath(base: CharSequence, other: CharSequence): String {
-        // todo: fix windows special root handling
-        if (other.isEmpty()){
+        if (other.isEmpty()) {
             return base.toString()
         }
-        val otherProps = PathProp.analyze(other)
-        if (otherProps.isAbs || base.isEmpty()) {
+        if (base.isEmpty()) {
             return other.toString()
         }
-        return if (base.endsWith('\\')) "$base$other" else "$base\\$other"
+        var base = base
+        var other = other
+        val otherProps = PathProp.analyze(other)
+        val baseProps = PathProp.analyze(base)
+        val otherDriver = otherProps.start.let { other.take(it) }
+        val baseDriver = baseProps.start.let { base.take(it) }
+        if (otherProps.isAbs) {
+            if (otherDriver != "" || baseDriver == "") {
+                return other.toString()
+            }
+            base = baseDriver
+        } else {
+            if (otherDriver == baseDriver) {
+                other = other.drop(otherProps.start)
+            } else if(otherDriver != "") {
+                return other.toString()
+            }
+        }
+        return when {
+            base.endsWith('\\') && other.startsWith('\\') -> "$base${other.substring(1)}"
+            base.endsWith('\\') || other.startsWith('\\') -> "$base$other"
+            else -> "$base\\$other"
+        }
     }
 
 }

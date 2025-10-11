@@ -231,22 +231,22 @@ class WindowsPathUtilTest {
         // 可越根：保留 ..，不报错、不折叠
         assertJoined("""C:\..\..\x""", """C:\""", """..\..\x""")
 
-//        // 2) 第二参数为根化路径（以反斜杠开头）：挂到 first 的盘符根
-//        // 例如 "\x" 在 Windows 语义是“当前盘”的根。这里用 first 的盘符。
-//        assertJoined("""C:\x""", """C:\a\b""", """\x""")
-//        // UNC 情况：first 是 UNC，second 根化到该 UNC 的根
-//        assertJoined("""\\server\share\x""", """\\server\share\base""", """\x""")
+        // 2) 第二参数为根化路径（以反斜杠开头）：挂到 first 的盘符根
+        // 例如 "\x" 在 Windows 语义是“当前盘”的根。这里用 first 的盘符。
+        assertJoined("""C:\x""", """C:\a\b""", """\x""")
+        // UNC 情况：first 是 UNC，second 根化到该 UNC 的根
+        assertJoined("""\\server\share\x""", """\\server\share\base""", """\x""")
 
         // 3) 第二参数为盘符根化路径（绝对路径）：直接返回 second
         assertJoined("""D:\x""", """C:\a\b""", """D:\x""")
         assertJoined("""C:\root""", """C:\a\b""", """C:\root""") // 覆盖自身盘
 
-//        // 4) 第二参数为“盘符相对路径”（带盘符但不以 '\' 开头，如 C:foo）
-//        // 规则建议：
-//        //  - 若盘符与 first 相同：在 first 上继续追加（等价“同盘相对”）
-//        //  - 若盘符不同：无法基于 first 继续，相当于“以该盘当前目录”为基，保留原样
-//        assertJoined("""C:\a\b\rel\y""", """C:\a\b""", """C:rel\y""") // 同盘
-//        assertJoined("""D:rel\y""", """C:\a\b""", """D:rel\y""")       // 异盘
+        // 4) 第二参数为“盘符相对路径”（带盘符但不以 '\' 开头，如 C:foo）
+        // 规则建议：
+        //  - 若盘符与 first 相同：在 first 上继续追加（等价“同盘相对”）
+        //  - 若盘符不同：无法基于 first 继续，相当于“以该盘当前目录”为基，保留原样
+        assertJoined("""C:\a\b\rel\y""", """C:\a\b""", """C:rel\y""") // 同盘
+        assertJoined("""D:rel\y""", """C:\a\b""", """D:rel\y""")       // 异盘
 
         // 5) UNC 路径
         assertJoined("""\\server\share\base\x""", """\\server\share\base""", """x""")
