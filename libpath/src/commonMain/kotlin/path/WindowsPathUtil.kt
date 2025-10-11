@@ -274,11 +274,11 @@ internal data object WindowsPathUtil {
     fun joinPath(base: CharSequence, other: CharSequence): String {
         // todo: fix windows special root handling
         if (other.isEmpty()){
-            return base as? String ?: base.toString()
+            return base.toString()
         }
         val otherProps = PathProp.analyze(other)
         if (otherProps.isAbs || base.isEmpty()) {
-            return other as? String ?: other.toString()
+            return other.toString()
         }
         return if (base.endsWith('\\')) "$base$other" else "$base\\$other"
     }
