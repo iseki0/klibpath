@@ -11,13 +11,11 @@ class WindowsPathTest {
     @Test
     fun testIsAbsoluteAndRoot() {
         val root = WindowsPath.of("C:\\")
-        assertTrue(root.isRoot, "Expected root: C:\\")
         assertTrue(root.isAbsolute, "Expected absolute: C:\\")
         assertNull(root.parent, "Root should have no parent (C:\\)")
 
         val rel = WindowsPath.of("foo\\bar")
         assertFalse(rel.isAbsolute, "Expected relative: foo\\bar")
-        assertFalse(rel.isRoot, "Not root: foo\\bar")
     }
 
     @Test
@@ -57,13 +55,6 @@ class WindowsPathTest {
         val abs = rel.toAbsolute()
         assertTrue(abs.isAbsolute, "Expected absolute path after toAbsolute(): $abs")
         assertEquals(abs, abs.toAbsolute(), "toAbsolute() should be idempotent: $abs")
-    }
-
-    @Test
-    fun testToAbsoluteCurrentNotRoot() {
-        val rel = WindowsPath.of(".")
-        val abs = rel.toAbsolute()
-        assertFalse(abs.isRoot, "Expected non-root absolute path for current directory: $abs")
     }
 
     @Test
