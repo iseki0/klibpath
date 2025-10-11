@@ -13,6 +13,7 @@ import platform.windows.DeleteFileW
 import platform.windows.ERROR_FILE_NOT_FOUND
 import platform.windows.ERROR_NO_MORE_FILES
 import platform.windows.FALSE
+import platform.windows.FILE_ATTRIBUTE_DIRECTORY
 import platform.windows.FindClose
 import platform.windows.FindFirstFileW
 import platform.windows.FindNextFileW
@@ -57,6 +58,7 @@ internal data object WindowsFileSystem : FileSystem {
         get() = this as? WindowsPath ?: throw IllegalArgumentException("Only WindowsPath is supported: $this")
 }
 
+
 internal class WindowsDirIterator : FileSystem.DirEntryIterator, AbstractIterator<FileSystem.DirEntry> {
     private class H(val m: Arena, val handle: HANDLE?, val p: CPointer<WIN32_FIND_DATAW>) : OneTimeClose() {
         override fun doClose() {
@@ -67,7 +69,7 @@ internal class WindowsDirIterator : FileSystem.DirEntryIterator, AbstractIterato
         }
     }
 
-    data class Entry(override val name: String) : FileSystem.DirEntry
+    data class Entry(override val name: String, override val isDirectory: Boolean) : FileSystem.DirEntry
 
 
     private val h: H
@@ -105,7 +107,11 @@ internal class WindowsDirIterator : FileSystem.DirEntryIterator, AbstractIterato
         if (entryName == "." || entryName == "..") {
             return false
         }
-        setNext(Entry(name = entryName))
+        val entry = Entry(
+            name = entryName,
+            isDirectory = h.p.pointed.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY.toUInt() != 0u,
+        )
+        setNext(entry)
         return true
     }
 

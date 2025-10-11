@@ -56,6 +56,14 @@ class WindowsPathTest {
         val rel = WindowsPath.of("folder\\file.txt")
         val abs = rel.toAbsolute()
         assertTrue(abs.isAbsolute, "Expected absolute path after toAbsolute(): $abs")
+        assertEquals(abs, abs.toAbsolute(), "toAbsolute() should be idempotent: $abs")
+    }
+
+    @Test
+    fun testToAbsoluteCurrentNotRoot() {
+        val rel = WindowsPath.of(".")
+        val abs = rel.toAbsolute()
+        assertFalse(abs.isRoot, "Expected non-root absolute path for current directory: $abs")
     }
 
     @Test
@@ -97,5 +105,8 @@ class WindowsPathTest {
             WindowsPath.of("C:\\Users\\All Users11111").evalSymlink()
         }
     }
+
+
+
 }
 
