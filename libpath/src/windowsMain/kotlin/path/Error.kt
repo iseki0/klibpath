@@ -35,11 +35,11 @@ internal fun formatErrorCode(code: UInt = GetLastError()): String {
             Arguments = null,
         )
         if (n == 0u) {
-            return "unknown error (${code.toHexString()})"
+            return "unknown error (0x${code.toHexString()})"
         }
         val s = r.value!!.toKString().trimEnd()
         LocalFree(r.value)
-        return "$s (${code.toHexString()})"
+        return "$s (0x${code.toHexString()})"
     }
 }
 
