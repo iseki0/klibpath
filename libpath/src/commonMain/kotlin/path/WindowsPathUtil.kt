@@ -169,6 +169,7 @@ internal data object WindowsPathUtil {
     }
 
     fun normalizePath(input: CharSequence, collapse: Boolean = true): String {
+        if (input.isEmpty()) return ""
         val buf = CharArray(input.length + 1)
         val props = PathProp.analyze(input)
         val start = props.start

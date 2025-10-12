@@ -20,6 +20,8 @@ class WindowsPathUtilTest {
             assertEquals(expected, n1, "input: $input1")
         }
 
+        assertNormalized("", "")
+
         assertNormalized("""\\server\share\""", """\\server\share""")
         assertNormalized("""\\server\share\""", """\\server\share\..\..\..""")
         assertNormalized("""\\server\share\a\c""", """\\server\share\a\b\..\c""")
@@ -281,6 +283,9 @@ class WindowsPathUtilTest {
         // 10) 多段与特殊点位（不折叠）
         assertJoined("""C:\a\.\b\..\c\.\d""", """C:\a\.\b""", """..\c\.\d""")
         assertJoined("""\\server\share\.\..\x""", """\\server\share\.""", """..\x""")
+
+        assertJoined("""C:\Users""", """C:\Users""", "")
+        assertJoined("""C:\Users\foo""", """C:\Users""", "foo")
     }
 
 
