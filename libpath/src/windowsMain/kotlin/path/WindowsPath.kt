@@ -3,29 +3,22 @@
 package path
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.alloc
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
-import platform.windows.BY_HANDLE_FILE_INFORMATION
 import platform.windows.CloseHandle
 import platform.windows.CreateFileW
-import platform.windows.FALSE
 import platform.windows.FILE_FLAG_BACKUP_SEMANTICS
 import platform.windows.FILE_READ_ATTRIBUTES
 import platform.windows.FILE_SHARE_DELETE
 import platform.windows.FILE_SHARE_READ
 import platform.windows.FILE_SHARE_WRITE
-import platform.windows.GetFileInformationByHandle
 import platform.windows.GetFinalPathNameByHandleW
 import platform.windows.GetFullPathNameW
 import platform.windows.INVALID_HANDLE_VALUE
 import platform.windows.MAX_PATH
 import platform.windows.OPEN_EXISTING
-import platform.windows.PathIsRelativeW
-import platform.windows.TRUE
 import platform.windows.WCHARVar
 
 internal class WindowsPath : Path {
@@ -45,7 +38,7 @@ internal class WindowsPath : Path {
     override val fileSystem: FileSystem
         get() = WindowsFileSystem
 
-    override val isAbsolute: Boolean get() = PathIsRelativeW(value) != TRUE
+    override val isAbsolute: Boolean get() = WindowsPathUtil.PathProp.analyze(value).isAbs
 
     override val parent: Path?
         get() = if (filenameIdx == -1) null else of(value.substring(0, filenameIdx))
