@@ -4,7 +4,7 @@ import kotlin.jvm.JvmInline
 
 internal data object WindowsPathUtil {
     private fun invalidPath(
-        input: CharSequence, reason: String
+        input: CharSequence, reason: String,
     ) = InvalidPathException(input.toString(), reason)
 
     private fun Char.isSeparator() = this == '\\' || this == '/'
@@ -258,7 +258,33 @@ internal data object WindowsPathUtil {
             buf[p + start - 1] = buf[p + start - 1].uppercaseChar()
         }
         val offset = p + 1
-        return buf.concatToString(offset)
+        return buf.concatToString(offset).let(::normalizePathForInMaxPathConvention)
+    }
+
+    private fun normalizePathForInMaxPathConvention(input: CharSequence): String {
+        if (input.isEmpty()) return ""
+        val props = PathProp.analyze(input)
+        if (!props.isAbs) return input.toString()
+        if (props.isLong) {
+            if (props.isUNC) {
+                if (input.length < 264) {
+                    return '\\' + input.substring(7)
+                }
+                return input.toString()
+            }
+            if (input.length < 264) {
+                return input.substring(4)
+            }
+            return input.toString()
+        }
+        if (input.length >= 260) {
+            if (props.isUNC) {
+                return """\\?\UNC\""" + input.substring(2)
+            }
+            return """\\?\$input"""
+        }
+        return input.toString()
+
     }
 
     fun getFilenameIndex(path: CharSequence): Int {
@@ -293,7 +319,7 @@ internal data object WindowsPathUtil {
         } else {
             if (otherDriver == baseDriver) {
                 other = other.drop(otherProps.start)
-            } else if(otherDriver != "") {
+            } else if (otherDriver != "") {
                 return other.toString()
             }
         }

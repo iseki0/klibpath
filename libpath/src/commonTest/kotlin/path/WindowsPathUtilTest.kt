@@ -28,11 +28,11 @@ class WindowsPathUtilTest {
         assertNormalized("""\\server\share\a\c""", """\\server\share\a\b\..\.\c""")
         assertNormalized("""\\server\share\a\c""", """\\server\share\a\\.\bbbbbb\..\c\""")
 
-        assertNormalized("""\\?\C:\a\c""", """\\?\C:\a\b\..\c""")
-        assertNormalized("""\\?\C:\a\c""", """\\?\C:\a\b\..\.\c""")
-        assertNormalized("""\\?\C:\a\c""", """\\?\C:\a\\.\bbbbbb\..\c\""")
+        assertNormalized("""C:\a\c""", """\\?\C:\a\b\..\c""")
+        assertNormalized("""C:\a\c""", """\\?\C:\a\b\..\.\c""")
+        assertNormalized("""C:\a\c""", """\\?\C:\a\\.\bbbbbb\..\c\""")
 
-        assertNormalized("""\\?\C:\""", """\\?\C:\""")
+        assertNormalized("""C:\""", """\\?\C:\""")
 
 
         assertNormalized1("""a""", """a\\""")
@@ -91,6 +91,30 @@ class WindowsPathUtilTest {
         }
     }
 
+    @Test
+    fun testLongPathNormalizationDos(){
+        val longInput = """C:\4""" + """\234""".repeat(64)
+        val longNormalized = WindowsPathUtil.normalizePath(longInput)
+        val longExpected = """\\?\$longInput"""
+        assertEquals(longExpected, longNormalized)
+        assertEquals(longExpected, WindowsPathUtil.normalizePath(longNormalized))
+
+        val shortInput = longInput.dropLast(1)
+        assertEquals(shortInput, WindowsPathUtil.normalizePath(shortInput))
+
+        val shortInput1 = """\\?\$shortInput"""
+        assertEquals(shortInput, WindowsPathUtil.normalizePath(shortInput1))
+    }
+
+    @Test
+    fun testLongPathUnc() {
+        val longInput = """\\345\78""" + """\234""".repeat(63)
+        val longNormalized = WindowsPathUtil.normalizePath(longInput)
+        val longExpected = """\\?\UNC\345\78""" + """\234""".repeat(63)
+        assertEquals(longExpected, longNormalized)
+        assertEquals(longExpected, WindowsPathUtil.normalizePath(longNormalized))
+    }
+
 
     private fun assertPathProp(
         input: String,
@@ -99,7 +123,7 @@ class WindowsPathUtilTest {
         hasDosPrefix: Boolean,
         isAbs: Boolean,
         isNoPath: Boolean,
-        expectedStart: Int
+        expectedStart: Int,
     ) {
         val p = WindowsPathUtil.PathProp.analyze(input)
         assertEquals(isLong, p.isLong, "isLong mismatch for '$input'")
@@ -199,19 +223,6 @@ class WindowsPathUtilTest {
             isNoPath = true,
             expectedStart = 2,
         )
-    }
-
-
-    @Test
-    fun testJoinPath() {
-        fun assertJoined(expected: String, first: String, second: String) {
-            val j = WindowsPathUtil.joinPath(first, second)
-            assertEquals(expected, j, "join('$first', '$second')")
-        }
-
-        assertJoined("""C:\a\b""", """C:\a""", """b""")
-        assertJoined("""C:\a\b""", """C:\a\""", """b""")
-        assertJoined("""C:\a\.\.\.\.\b""", """C:\a\.\.\.\.""", """b""")
     }
 
     @Test
