@@ -56,3 +56,7 @@ actual class AccessDeniedException : FileSystemException {
     actual constructor(file: String?) : super(file)
     actual constructor(file: String?, other: String?, reason: String?) : super(file, other, reason)
 }
+
+actual class NotDirectoryException : FileSystemException {
+    actual constructor(file: String?) : super(file)
+}

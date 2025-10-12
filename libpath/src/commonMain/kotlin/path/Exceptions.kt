@@ -25,4 +25,6 @@ expect class AccessDeniedException : FileSystemException {
     constructor(file: String?, other: String?, reason: String?)
 }
 
-
+expect class NotDirectoryException : FileSystemException {
+    constructor(file: String?)
+}

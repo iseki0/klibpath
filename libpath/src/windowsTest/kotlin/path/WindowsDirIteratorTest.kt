@@ -47,4 +47,11 @@ class WindowsDirIteratorTest {
             }
         }
     }
+
+    @Test
+    fun testNotDirectory() {
+        assertFailsWith<NotDirectoryException> {
+            WindowsDirIterator("./build.gradle.kts")
+        }
+    }
 }
