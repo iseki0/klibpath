@@ -34,6 +34,8 @@ interface FileSystem {
     fun isSameFile(path1: Path, path2: Path): Boolean {
         return path1.evalSymlink().toAbsolute() == path2.evalSymlink().toAbsolute()
     }
+
+    fun getFileKey(path: Path): Any? = null
 }
 
 expect val PlatformFileSystem: FileSystem
@@ -54,39 +56,70 @@ internal class PathWalkerImpl(start: Path, configure: FileSystem.WalkOption.() -
         override var visitDirectory: Boolean = true
     }.apply { configure() }
 
-    private val stack: ArrayDeque<Pair<Path, FileSystem.DirEntryIterator>> =
-        ArrayDeque(listOf(start to start.fileSystem.openDirectoryIterator(start)))
+    class WalkNode(val dir: Path) : AutoCloseable {
+        val iterator = dir.fileSystem.openDirectoryIterator(dir)
+        val fileKey = try {
+            dir.fileSystem.getFileKey(dir)
+        } catch (_: Exception) {
+            null
+        }
+
+        override fun close() {
+            iterator.close()
+        }
+    }
+
+    private val stack: ArrayDeque<WalkNode> = ArrayDeque(listOf(WalkNode(start)))
     private var closed = false
     override fun close() {
         closed = true
-        stack.forEach { (_, i) -> i.close() }
+        stack.forEach(WalkNode::close)
+    }
+
+    private fun isSame(node: WalkNode, childPath: Path): Boolean {
+        val nodeKey = node.fileKey
+        if (nodeKey != null) {
+            val childKey = try {
+                childPath.fileSystem.getFileKey(childPath)
+            } catch (_: Exception) {
+                null
+            }
+            if (childKey != null) {
+                return childKey == node.fileKey
+            }
+        }
+        return try {
+            childPath.fileSystem.isSameFile(childPath, node.dir)
+        } catch (_: Exception) {
+            true
+        }
     }
 
     override tailrec fun computeNext() {
         check(!closed)
-        val (currentDirectory, iterator) = stack.lastOrNull() ?: run {
+        val node = stack.lastOrNull() ?: run {
             done()
             return
         }
-        if (!iterator.hasNext()) {
-            iterator.close()
+        if (!node.iterator.hasNext()) {
+            node.close()
             stack.removeLast()
-            option.onLeave(currentDirectory)
+            option.onLeave(node.dir)
             computeNext()
             return
         }
-        val entry = iterator.next()
-        val childPath = currentDirectory.join(entry.name)
+        val entry = node.iterator.next()
+        val childPath = node.dir.join(entry.name)
         if (!entry.isDirectory) {
             setNext(childPath)
             return
         }
-        if (stack.any { (path) -> childPath.fileSystem.isSameFile(childPath, path) }) {
+        if (stack.any { node -> isSame(node, childPath) }) {
             computeNext()
             return
         }
         if (option.onEnter(childPath)) {
-            stack.add(childPath to childPath.fileSystem.openDirectoryIterator(childPath))
+            stack.add(WalkNode(childPath))
         }
         if (option.visitDirectory) {
             setNext(childPath)

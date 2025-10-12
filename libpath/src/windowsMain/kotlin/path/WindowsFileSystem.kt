@@ -6,21 +6,32 @@ import kotlinx.cinterop.Arena
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
+import platform.windows.BY_HANDLE_FILE_INFORMATION
+import platform.windows.CloseHandle
+import platform.windows.CreateFileW
 import platform.windows.DeleteFileW
 import platform.windows.ERROR_FILE_NOT_FOUND
 import platform.windows.ERROR_NO_MORE_FILES
 import platform.windows.FALSE
 import platform.windows.FILE_ATTRIBUTE_DIRECTORY
+import platform.windows.FILE_FLAG_BACKUP_SEMANTICS
+import platform.windows.FILE_READ_ATTRIBUTES
+import platform.windows.FILE_SHARE_DELETE
+import platform.windows.FILE_SHARE_READ
+import platform.windows.FILE_SHARE_WRITE
 import platform.windows.FindClose
 import platform.windows.FindFirstFileW
 import platform.windows.FindNextFileW
+import platform.windows.GetFileInformationByHandle
 import platform.windows.GetLastError
 import platform.windows.GetLogicalDrives
 import platform.windows.HANDLE
 import platform.windows.INVALID_HANDLE_VALUE
+import platform.windows.OPEN_EXISTING
 import platform.windows.WIN32_FIND_DATAW
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.Cleaner
@@ -56,6 +67,42 @@ internal data object WindowsFileSystem : FileSystem {
 
     private val Path.win: WindowsPath
         get() = this as? WindowsPath ?: throw IllegalArgumentException("Only WindowsPath is supported: $this")
+
+    override fun isSameFile(path1: Path, path2: Path): Boolean {
+        val path1 = getFileKey(path1)
+        val path2 = getFileKey(path2)
+        return path1 == path2
+    }
+
+    data class INode(val volumeSerialNumber: UInt, val fileIndexHigh: UInt, val fileIndexLow: UInt)
+
+    override fun getFileKey(path: Path): Any {
+        val file = path.win.value
+        val handle = CreateFileW(
+            lpFileName = file,
+            dwDesiredAccess = FILE_READ_ATTRIBUTES.toUInt(),
+            dwShareMode = (FILE_SHARE_READ or FILE_SHARE_WRITE or FILE_SHARE_DELETE).toUInt(),
+            lpSecurityAttributes = null,
+            dwCreationDisposition = OPEN_EXISTING.toUInt(),
+            dwFlagsAndAttributes = FILE_FLAG_BACKUP_SEMANTICS.toUInt(),
+            hTemplateFile = null,
+        )
+        if (handle == INVALID_HANDLE_VALUE) {
+            throw translateIOError(file = file)
+        }
+        try {
+            memScoped {
+                val f = alloc<BY_HANDLE_FILE_INFORMATION>()
+                if (GetFileInformationByHandle(handle, f.ptr) == FALSE) {
+                    throw translateIOError(file = file)
+                }
+                return INode(f.dwVolumeSerialNumber, f.nFileIndexHigh, f.nFileIndexLow)
+            }
+        } finally {
+            CloseHandle(handle)
+        }
+    }
+
 }
 
 
