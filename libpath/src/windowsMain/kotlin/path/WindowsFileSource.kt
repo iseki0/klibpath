@@ -6,12 +6,15 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.UIntVar
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.alloc
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
 import kotlinx.io.Buffer
 import kotlinx.io.RawSource
+import kotlinx.io.UnsafeIoApi
+import kotlinx.io.unsafe.UnsafeBufferOperations
 import platform.windows.CloseHandle
 import platform.windows.CreateFileW
 import platform.windows.ERROR_HANDLE_EOF
@@ -24,11 +27,12 @@ import platform.windows.GetLastError
 import platform.windows.INVALID_HANDLE_VALUE
 import platform.windows.OPEN_EXISTING
 import platform.windows.ReadFile
+import platform.windows.TRUE
+import platform.windows.WINBOOL
 import kotlin.math.min
 
-private const val MAX_BUFFER_SIZE = 64 * 1024L
-private val EEOF = ERROR_HANDLE_EOF.toUInt()
 
+@OptIn(UnsafeIoApi::class)
 internal class WindowsFileSource(val path: String) : RawSource {
     private val h: Handle
 
@@ -57,24 +61,33 @@ internal class WindowsFileSource(val path: String) : RawSource {
         check(!h.isClosed)
         require(byteCount >= 0)
         if (byteCount == 0L) return 0L
-        val buf = ByteArray(min(byteCount, MAX_BUFFER_SIZE).toInt())
         memScoped {
-            val n = alloc<UIntVar>()
-            val r = buf.usePinned { pinned ->
-                ReadFile(
-                    hFile = h.handle,
-                    lpBuffer = pinned.addressOf(0),
-                    nNumberOfBytesToRead = buf.size.toUInt(),
-                    lpNumberOfBytesRead = n.ptr,
-                    lpOverlapped = null,
-                )
+            val r: WINBOOL
+            val e: Int
+            val n = UnsafeBufferOperations.writeToTail(sink, 1) { bytes, startIndexInclusive, endIndexExclusive ->
+                val n = alloc<UIntVar>()
+                r = bytes.usePinned { pinned ->
+                    ReadFile(
+                        hFile = h.handle,
+                        lpBuffer = pinned.addressOf(startIndexInclusive),
+                        nNumberOfBytesToRead = min(
+                            (endIndexExclusive - startIndexInclusive).toLong(),
+                            byteCount,
+                        ).toUInt(),
+                        lpNumberOfBytesRead = n.ptr,
+                        lpOverlapped = null,
+                    )
+                }
+                e = GetLastError().convert()
+                if (r == FALSE && e != ERROR_HANDLE_EOF) {
+                    throw translateIOError(code = e.convert(), file = path)
+                }
+                n.value.toInt()
             }
-            val e = GetLastError()
-            val v = n.value.toInt()
-            if (v > 0) sink.write(buf, 0, v)
-            if (r == FALSE && e == EEOF || v == 0) return -1
-            if (r == FALSE && e != EEOF) throw translateIOError(file = path, code = e)
-            return v.toLong()
+            if (r == TRUE && n == 0 || e == ERROR_HANDLE_EOF) {
+                return -1L
+            }
+            return n.toLong()
         }
     }
 
