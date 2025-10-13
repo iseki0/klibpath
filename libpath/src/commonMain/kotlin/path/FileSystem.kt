@@ -1,5 +1,6 @@
 package path
 
+import kotlinx.io.RawSink
 import kotlinx.io.RawSource
 
 interface FileSystem {
@@ -40,6 +41,7 @@ interface FileSystem {
     fun openRead(path: Path): RawSource
 
     fun getFileKey(path: Path): Any? = null
+    fun openWrite(path: Path): RawSink
 }
 
 expect val PlatformFileSystem: FileSystem

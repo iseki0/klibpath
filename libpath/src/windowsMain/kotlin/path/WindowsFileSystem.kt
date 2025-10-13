@@ -10,6 +10,7 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.toKString
+import kotlinx.io.RawSink
 import kotlinx.io.RawSource
 import kotlinx.io.buffered
 import platform.windows.BY_HANDLE_FILE_INFORMATION
@@ -106,6 +107,9 @@ internal data object WindowsFileSystem : FileSystem {
     }
 
     override fun openRead(path: Path): RawSource = WindowsFileSource(path.win.value).buffered()
+
+    override fun openWrite(path: Path): RawSink =
+        WindowsFileSink(path.win.value, create = true, createNew = false, truncate = false)
 }
 
 
