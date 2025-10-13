@@ -21,7 +21,7 @@ class WindowsDirIteratorTest {
     @Test
     fun test() {
         val l = WindowsDirIterator("src/windowsTest").use { iter -> iter.asSequence().map { it.name }.toList() }
-        assertEquals(listOf("kotlin"), l)
+        assertEquals(listOf("kotlin", "resources"), l)
     }
 
     @Test

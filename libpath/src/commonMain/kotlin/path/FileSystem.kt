@@ -1,5 +1,7 @@
 package path
 
+import kotlinx.io.RawSource
+
 interface FileSystem {
     val separator: String
     val roots: List<Path>
@@ -34,6 +36,8 @@ interface FileSystem {
     fun isSameFile(path1: Path, path2: Path): Boolean {
         return path1.evalSymlink().toAbsolute() == path2.evalSymlink().toAbsolute()
     }
+
+    fun openRead(path: Path): RawSource
 
     fun getFileKey(path: Path): Any? = null
 }
