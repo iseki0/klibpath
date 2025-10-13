@@ -136,4 +136,5 @@ internal class WindowsFileSink(val path: String, create: Boolean, createNew: Boo
         h.close()
     }
 
+    override fun toString(): String = "WindowsFileSink(path=\"$path\")"
 }
