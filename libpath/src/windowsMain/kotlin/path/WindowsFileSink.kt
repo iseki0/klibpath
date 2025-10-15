@@ -90,7 +90,7 @@ internal class WindowsFileSink(val path: String, create: Boolean, createNew: Boo
             if (e == ERROR_ACCESS_DENIED && dda != GENERIC_WRITE.toUInt()) {
                 return c(attr, GENERIC_WRITE.convert())
             }
-            throw translateIOError(file = path, code = e.convert())
+            throw translateIOError(file = path, code = e)
         }
 
         val handle = c()

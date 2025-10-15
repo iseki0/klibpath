@@ -135,7 +135,7 @@ internal data object WindowsFileSystem : FileSystem {
     override fun mkdirs(path: Path) {
         val code = SHCreateDirectoryExW(null, path.toAbsolute().win.value, null)
         if (code == ERROR_SUCCESS) return
-        throw translateIOError(file = path.win.value, code = code.toUInt())
+        throw translateIOError(file = path.win.value, code = code)
     }
 
     override fun evalSymlink(path: Path): Path {

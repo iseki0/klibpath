@@ -80,7 +80,7 @@ internal class WindowsFileSource(val path: String) : RawSource {
                 }
                 e = GetLastError().convert()
                 if (r == FALSE && e != ERROR_HANDLE_EOF) {
-                    throw translateIOError(code = e.convert(), file = path)
+                    throw translateIOError(code = e, file = path)
                 }
                 n.value.toInt()
             }

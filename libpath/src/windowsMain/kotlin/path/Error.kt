@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalForeignApi::class) @file:Suppress("NOTHING_TO_INLINE")
+
 package path
 
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -26,8 +28,11 @@ import platform.windows.GetLastError
 import platform.windows.LPWSTRVar
 import platform.windows.LocalFree
 
-@OptIn(ExperimentalForeignApi::class)
-internal fun formatErrorCode(code: UInt = GetLastError()): String {
+internal inline fun formatErrorCode(): String = formatErrorCode(GetLastError())
+
+internal inline fun formatErrorCode(code: Int): String = formatErrorCode(code.toUInt())
+
+internal fun formatErrorCode(code: UInt): String {
     memScoped {
         val r = alloc<LPWSTRVar>()
         val n = FormatMessageW(
@@ -48,8 +53,19 @@ internal fun formatErrorCode(code: UInt = GetLastError()): String {
     }
 }
 
-internal fun translateIOError(code: UInt = GetLastError(), file: String? = null, other: String? = null): Throwable {
-    return when (code.toInt()) {
+
+internal inline fun translateIOError(file: String? = null, other: String? = null): Throwable =
+    translateIOError(GetLastError().toInt(), file, other)
+
+internal inline fun translateIOError(code: UInt, file: String? = null, other: String? = null): Throwable =
+    translateIOError(code.toInt(), file, other)
+
+internal fun translateIOError(
+    code: Int,
+    file: String? = null,
+    other: String? = null,
+): Throwable {
+    return when (code) {
         ERROR_PATH_NOT_FOUND,
         ERROR_FILE_NOT_FOUND,
         ERROR_MUI_FILE_NOT_FOUND,
