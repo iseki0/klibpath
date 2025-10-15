@@ -15,10 +15,12 @@ import kotlinx.io.RawSource
 import kotlinx.io.buffered
 import platform.windows.BY_HANDLE_FILE_INFORMATION
 import platform.windows.CloseHandle
+import platform.windows.CreateDirectoryW
 import platform.windows.CreateFileW
 import platform.windows.DeleteFileW
 import platform.windows.ERROR_FILE_NOT_FOUND
 import platform.windows.ERROR_NO_MORE_FILES
+import platform.windows.ERROR_SUCCESS
 import platform.windows.FALSE
 import platform.windows.FILE_ATTRIBUTE_DIRECTORY
 import platform.windows.FILE_FLAG_BACKUP_SEMANTICS
@@ -35,6 +37,9 @@ import platform.windows.GetLogicalDrives
 import platform.windows.HANDLE
 import platform.windows.INVALID_HANDLE_VALUE
 import platform.windows.OPEN_EXISTING
+import platform.windows.PathIsDirectoryW
+import platform.windows.RemoveDirectoryW
+import platform.windows.SHCreateDirectoryExW
 import platform.windows.WIN32_FIND_DATAW
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.Cleaner
@@ -59,9 +64,14 @@ internal data object WindowsFileSystem : FileSystem {
 
     override fun delete(path: Path, ignoreIfNotExists: Boolean) {
         val p = path.win.value
-        if (DeleteFileW(p) == FALSE) {
+        val r = if (PathIsDirectoryW(p) != FALSE) {
+            RemoveDirectoryW(p)
+        } else {
+            DeleteFileW(p)
+        }
+        if (r == FALSE) {
             try {
-                translateIOError(file = p)
+                throw translateIOError(file = p)
             } catch (e: NoSuchFileException) {
                 if (!ignoreIfNotExists) throw e
             }
@@ -110,6 +120,18 @@ internal data object WindowsFileSystem : FileSystem {
 
     override fun openWrite(path: Path): RawSink =
         WindowsFileSink(path.win.value, create = true, createNew = false, truncate = false)
+
+    override fun mkdir(path: Path) {
+        if (CreateDirectoryW(path.win.value, null) == FALSE) {
+            throw translateIOError(file = path.win.value)
+        }
+    }
+
+    override fun mkdirs(path: Path) {
+        val code = SHCreateDirectoryExW(null, path.toAbsolute().win.value, null)
+        if (code == ERROR_SUCCESS) return
+        throw translateIOError(file = path.win.value, code = code.toUInt())
+    }
 }
 
 

@@ -97,7 +97,18 @@ class WindowsPathTest {
         }
     }
 
-
+    @Test
+    fun testFailedToRemoveDirectoryContainsFile() {
+        val path0 = Path("testFailedToRemoveDirectoryContainsFile")
+        val path = Path("testFailedToRemoveDirectoryContainsFile\\0d000721")
+        try {
+            PlatformFileSystem.mkdirs(path)
+        } catch (_: FileAlreadyExistsException) {
+        }
+        assertFailsWith<DirectoryNotEmptyException> { PlatformFileSystem.delete(path0) }
+        PlatformFileSystem.delete(path)
+        PlatformFileSystem.delete(path0)
+    }
 
 }
 

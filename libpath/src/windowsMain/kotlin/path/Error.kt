@@ -8,7 +8,11 @@ import kotlinx.cinterop.reinterpret
 import kotlinx.cinterop.toKString
 import kotlinx.cinterop.value
 import platform.windows.ERROR_ACCESS_DENIED
+import platform.windows.ERROR_ALREADY_EXISTS
+import platform.windows.ERROR_BAD_PATHNAME
 import platform.windows.ERROR_DIRECTORY
+import platform.windows.ERROR_DIR_NOT_EMPTY
+import platform.windows.ERROR_FILE_EXISTS
 import platform.windows.ERROR_FILE_NOT_FOUND
 import platform.windows.ERROR_MUI_FILE_NOT_FOUND
 import platform.windows.ERROR_NOT_ENOUGH_MEMORY
@@ -58,6 +62,9 @@ internal fun translateIOError(code: UInt = GetLastError(), file: String? = null,
         ERROR_NOT_ENOUGH_MEMORY -> OutOfMemoryError()
         ERROR_NOT_SUPPORTED -> UnsupportedOperationException(formatErrorCode(code))
         ERROR_DIRECTORY -> NotDirectoryException(file)
+        ERROR_DIR_NOT_EMPTY -> DirectoryNotEmptyException(file)
+        ERROR_FILE_EXISTS, ERROR_ALREADY_EXISTS -> FileAlreadyExistsException(file, other, formatErrorCode(code))
+        ERROR_BAD_PATHNAME -> InvalidPathException(file.orEmpty(), formatErrorCode(code))
         else -> IOException(formatErrorCode(code))
     }
 }

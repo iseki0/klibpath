@@ -49,7 +49,7 @@ actual open class FileSystemException : IOException {
 
 actual class NoSuchFileException : FileSystemException {
     actual constructor(file: String?) : super(file)
-    actual constructor(file: String?, other: String?, reason: String?): super(file, other, reason)
+    actual constructor(file: String?, other: String?, reason: String?) : super(file, other, reason)
 }
 
 actual class AccessDeniedException : FileSystemException {
@@ -59,4 +59,13 @@ actual class AccessDeniedException : FileSystemException {
 
 actual class NotDirectoryException : FileSystemException {
     actual constructor(file: String?) : super(file)
+}
+
+actual class DirectoryNotEmptyException : FileSystemException {
+    actual constructor(file: String?) : super(file)
+}
+
+actual class FileAlreadyExistsException : FileSystemException {
+    actual constructor(file: String?) : super(file)
+    actual constructor(file: String?, other: String?, reason: String?) : super(file, other, reason)
 }

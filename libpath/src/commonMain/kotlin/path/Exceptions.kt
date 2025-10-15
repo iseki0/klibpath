@@ -28,3 +28,12 @@ expect class AccessDeniedException : FileSystemException {
 expect class NotDirectoryException : FileSystemException {
     constructor(file: String?)
 }
+
+expect class DirectoryNotEmptyException : FileSystemException {
+    constructor(file: String?)
+}
+
+expect class FileAlreadyExistsException : FileSystemException {
+    constructor(file: String?)
+    constructor(file: String?, other: String?, reason: String?)
+}

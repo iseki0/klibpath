@@ -42,6 +42,9 @@ interface FileSystem {
 
     fun getFileKey(path: Path): Any? = null
     fun openWrite(path: Path): RawSink
+
+    fun mkdir(path: Path)
+    fun mkdirs(path: Path)
 }
 
 expect val PlatformFileSystem: FileSystem
