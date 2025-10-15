@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalForeignApi::class)
-
 package path
 
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -11,6 +9,7 @@ import platform.windows.GetFullPathNameW
 import platform.windows.MAX_PATH
 import platform.windows.WCHARVar
 
+@OptIn(ExperimentalForeignApi::class)
 internal class WindowsPath : Path {
     internal val value: String
     val filenameIdx: Int
@@ -43,7 +42,20 @@ internal class WindowsPath : Path {
 
     override fun normalization(): Path = ofNormalized(WindowsPathUtil.normalizePath(value))
 
-    override fun toAbsolute(): Path = ofNormalized(getFullPath(value))
+    override fun toAbsolute(): Path {
+        memScoped {
+            var buf = allocArray<WCHARVar>(MAX_PATH)
+            var n = GetFullPathNameW(value, MAX_PATH.convert(), buf, null)
+            if (n >= MAX_PATH.convert()) {
+                buf = allocArray<WCHARVar>(n.convert())
+                n = GetFullPathNameW(value, n, buf, null)
+            }
+            if (n == 0u) {
+                throw InvalidPathException(value, formatErrorCode())
+            }
+            return of(buf.toKString())
+        }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -60,22 +72,6 @@ internal class WindowsPath : Path {
 
     override fun toString(): String {
         return value
-    }
-}
-
-
-private fun getFullPath(s: String): String {
-    memScoped {
-        var buf = allocArray<WCHARVar>(MAX_PATH)
-        var n = GetFullPathNameW(s, MAX_PATH.convert(), buf, null)
-        if (n >= MAX_PATH.convert()) {
-            buf = allocArray<WCHARVar>(n.convert())
-            n = GetFullPathNameW(s, n, buf, null)
-        }
-        if (n == 0u) {
-            throw InvalidPathException(s, formatErrorCode())
-        }
-        return buf.toKString()
     }
 }
 
