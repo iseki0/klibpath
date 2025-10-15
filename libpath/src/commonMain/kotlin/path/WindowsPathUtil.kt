@@ -80,12 +80,11 @@ internal data object WindowsPathUtil {
     @JvmInline
     internal value class PathProp private constructor(private val v: ULong) {
         companion object {
-            const val IS_LONG_OFF = 40
-            const val IS_UNC_OFF = 41
-            const val HAS_DOS_PREFIX = 42
-            const val IS_ABS_OFF = 43
-            const val IS_NO_PATH_OFF = 44
-            private inline val Boolean.l: ULong get() = if (this) 1uL else 0uL
+            const val IS_LONG_BIT = 1L shl 40
+            const val IS_UNC_BIT = 1L shl 41
+            const val HAS_DOS_PREFIX_BIT = 1L shl 42
+            const val IS_ABS_BIT = 1L shl 43
+            const val IS_NO_PATH_BIT = 1L shl 44
 
             fun analyze(input: CharSequence): PathProp {
                 val isLongPath: Boolean
@@ -125,42 +124,42 @@ internal data object WindowsPathUtil {
 
                 val isAbsolute = start <= input.lastIndex && input[start].isSeparator()
                 val isNoPath = start > input.lastIndex
-                var v = start.toUInt().toULong()
-                v = v or (isLongPath.l shl IS_LONG_OFF)
-                v = v or (isUncPath.l shl IS_UNC_OFF)
-                v = v or (hasDosPrefix.l shl HAS_DOS_PREFIX)
-                v = v or (isAbsolute.l shl IS_ABS_OFF)
-                v = v or (isNoPath.l shl IS_NO_PATH_OFF)
-                return PathProp(v)
+                var v = start.toUInt().toLong()
+                v = v or if (isLongPath) IS_LONG_BIT else 0L
+                v = v or if (isUncPath) IS_UNC_BIT else 0L
+                v = v or if (hasDosPrefix) HAS_DOS_PREFIX_BIT else 0L
+                v = v or if (isAbsolute) IS_ABS_BIT else 0L
+                v = v or if (isNoPath) IS_NO_PATH_BIT else 0L
+                return PathProp(v.toULong())
             }
         }
 
-        private fun testb(off: Int) = (v shr off and 1uL) != 0uL
+        private fun testb(bit: Long) = v.toLong() and bit != 0L
 
         /**
          * Path has long path prefix (e.g., `\\?\`).
          */
-        val isLong: Boolean get() = testb(IS_LONG_OFF)
+        val isLong: Boolean get() = testb(IS_LONG_BIT)
 
         /**
          * Path is a UNC path (e.g., `\\server\share`).
          */
-        val isUNC: Boolean get() = testb(IS_UNC_OFF)
+        val isUNC: Boolean get() = testb(IS_UNC_BIT)
 
         /**
          * Path has DOS drive letter prefix (e.g., `C:`).
          */
-        val hasDosPrefix: Boolean get() = testb(HAS_DOS_PREFIX)
+        val hasDosPrefix: Boolean get() = testb(HAS_DOS_PREFIX_BIT)
 
         /**
          * Path is absolute (e.g., `C:\folder` or `\\server\share`).
          */
-        val isAbs: Boolean get() = testb(IS_ABS_OFF)
+        val isAbs: Boolean get() = testb(IS_ABS_BIT)
 
         /**
          * Path contains no segments (e.g., `C:` or `\\server\share`).
          */
-        val isNoPath: Boolean get() = testb(IS_NO_PATH_OFF)
+        val isNoPath: Boolean get() = testb(IS_NO_PATH_BIT)
 
         /**
          * The index of the first character after the prefix (e.g., after `C:` or `\\server\share`).
