@@ -51,7 +51,11 @@ internal class WindowsFileSink(val path: String, create: Boolean, createNew: Boo
             else -> OPEN_EXISTING
         }
 
-        tailrec fun c(attr: Int = FILE_ATTRIBUTE_NORMAL, dda: UInt = GENERIC_READ or GENERIC_WRITE.convert()): HANDLE? {
+        tailrec fun c(
+            attr: Int = FILE_ATTRIBUTE_NORMAL,
+            dda: UInt = GENERIC_READ or GENERIC_WRITE.convert(),
+            attrRetry: Boolean = false,
+        ): HANDLE? {
             val h = CreateFileW(
                 lpFileName = path,
                 dwDesiredAccess = dda,
@@ -70,10 +74,10 @@ internal class WindowsFileSink(val path: String, create: Boolean, createNew: Boo
              * if the file exists and has the FILE_ATTRIBUTE_HIDDEN or FILE_ATTRIBUTE_SYSTEM attribute.
              * To avoid the error, specify the same attributes as the existing file.
              */
-            if (dwCreationDisposition == CREATE_ALWAYS && e == ERROR_ACCESS_DENIED && attr == FILE_ATTRIBUTE_NORMAL) {
+            if (dwCreationDisposition == CREATE_ALWAYS && e == ERROR_ACCESS_DENIED && attr == FILE_ATTRIBUTE_NORMAL && !attrRetry) {
                 val fAttr = GetFileAttributesW(path)
                 if (fAttr != INVALID_FILE_ATTRIBUTES && fAttr != FILE_ATTRIBUTE_NORMAL.convert<DWORD>()) {
-                    return c(fAttr.convert(), dda)
+                    return c(fAttr.convert(), dda, attrRetry = true)
                 }
             }
 
