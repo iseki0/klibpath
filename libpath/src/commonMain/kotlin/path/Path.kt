@@ -22,6 +22,8 @@ interface Path {
 }
 
 @JvmName("of")
-expect fun Path(path: String): Path
+fun Path(path: String): Path = createPath(path)
+
+internal expect fun createPath(path: String): Path
 
 
