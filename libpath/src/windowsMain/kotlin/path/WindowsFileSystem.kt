@@ -6,6 +6,8 @@ import kotlinx.cinterop.Arena
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
+import kotlinx.cinterop.allocArray
+import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.pointed
 import kotlinx.cinterop.ptr
@@ -32,14 +34,17 @@ import platform.windows.FindClose
 import platform.windows.FindFirstFileW
 import platform.windows.FindNextFileW
 import platform.windows.GetFileInformationByHandle
+import platform.windows.GetFinalPathNameByHandleW
 import platform.windows.GetLastError
 import platform.windows.GetLogicalDrives
 import platform.windows.HANDLE
 import platform.windows.INVALID_HANDLE_VALUE
+import platform.windows.MAX_PATH
 import platform.windows.OPEN_EXISTING
 import platform.windows.PathIsDirectoryW
 import platform.windows.RemoveDirectoryW
 import platform.windows.SHCreateDirectoryExW
+import platform.windows.WCHARVar
 import platform.windows.WIN32_FIND_DATAW
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.ref.Cleaner
@@ -131,6 +136,36 @@ internal data object WindowsFileSystem : FileSystem {
         val code = SHCreateDirectoryExW(null, path.toAbsolute().win.value, null)
         if (code == ERROR_SUCCESS) return
         throw translateIOError(file = path.win.value, code = code.toUInt())
+    }
+
+    override fun evalSymlink(path: Path): Path {
+        val s = path.win.value
+        memScoped {
+            val h = CreateFileW(
+                s, FILE_READ_ATTRIBUTES.toUInt(), (FILE_SHARE_READ or FILE_SHARE_WRITE or FILE_SHARE_DELETE).toUInt(),
+                lpSecurityAttributes = null,
+                dwCreationDisposition = OPEN_EXISTING.toUInt(),
+                dwFlagsAndAttributes = FILE_FLAG_BACKUP_SEMANTICS.toUInt(),
+                hTemplateFile = null,
+            )
+            if (h == INVALID_HANDLE_VALUE) {
+                throw translateIOError(file = s)
+            }
+            try {
+                var buf = allocArray<WCHARVar>(MAX_PATH)
+                var n = GetFinalPathNameByHandleW(h, buf, MAX_PATH.convert(), 0u)
+                if (n >= MAX_PATH.convert()) {
+                    buf = allocArray<WCHARVar>(n.convert())
+                    n = GetFinalPathNameByHandleW(h, buf, n, 0u)
+                }
+                if (n == 0u) {
+                    error("GetFinalPathNameByHandleW failed: ${formatErrorCode()}")
+                }
+                return WindowsPath.of(buf.toKString())
+            } finally {
+                CloseHandle(h)
+            }
+        }
     }
 }
 

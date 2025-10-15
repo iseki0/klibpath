@@ -17,7 +17,6 @@ interface Path {
     fun join(vararg other: String): Path
     fun normalization(): Path
     fun toAbsolute(): Path
-    fun evalSymlink(): Path
 
     companion object
 }

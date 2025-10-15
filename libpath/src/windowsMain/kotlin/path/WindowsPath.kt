@@ -7,18 +7,8 @@ import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.convert
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKString
-import platform.windows.CloseHandle
-import platform.windows.CreateFileW
-import platform.windows.FILE_FLAG_BACKUP_SEMANTICS
-import platform.windows.FILE_READ_ATTRIBUTES
-import platform.windows.FILE_SHARE_DELETE
-import platform.windows.FILE_SHARE_READ
-import platform.windows.FILE_SHARE_WRITE
-import platform.windows.GetFinalPathNameByHandleW
 import platform.windows.GetFullPathNameW
-import platform.windows.INVALID_HANDLE_VALUE
 import platform.windows.MAX_PATH
-import platform.windows.OPEN_EXISTING
 import platform.windows.WCHARVar
 
 internal class WindowsPath : Path {
@@ -55,8 +45,6 @@ internal class WindowsPath : Path {
 
     override fun toAbsolute(): Path = ofNormalized(getFullPath(value))
 
-    override fun evalSymlink(): Path = of(evalSymlink(value))
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -88,36 +76,6 @@ private fun getFullPath(s: String): String {
             throw InvalidPathException(s, formatErrorCode())
         }
         return buf.toKString()
-    }
-}
-
-
-private fun evalSymlink(s: String): String {
-    memScoped {
-        val h = CreateFileW(
-            s, FILE_READ_ATTRIBUTES.toUInt(), (FILE_SHARE_READ or FILE_SHARE_WRITE or FILE_SHARE_DELETE).toUInt(),
-            lpSecurityAttributes = null,
-            dwCreationDisposition = OPEN_EXISTING.toUInt(),
-            dwFlagsAndAttributes = FILE_FLAG_BACKUP_SEMANTICS.toUInt(),
-            hTemplateFile = null,
-        )
-        if (h == INVALID_HANDLE_VALUE) {
-            throw translateIOError(file = s)
-        }
-        try {
-            var buf = allocArray<WCHARVar>(MAX_PATH)
-            var n = GetFinalPathNameByHandleW(h, buf, MAX_PATH.convert(), 0u)
-            if (n >= MAX_PATH.convert()) {
-                buf = allocArray<WCHARVar>(n.convert())
-                n = GetFinalPathNameByHandleW(h, buf, n, 0u)
-            }
-            if (n == 0u) {
-                error("GetFinalPathNameByHandleW failed: ${formatErrorCode()}")
-            }
-            return buf.toKString()
-        } finally {
-            CloseHandle(h)
-        }
     }
 }
 

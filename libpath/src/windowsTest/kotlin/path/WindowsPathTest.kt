@@ -85,7 +85,7 @@ class WindowsPathTest {
 
     @Test
     fun testEvalSymlink() {
-        val p = WindowsPath.of("C:\\Users\\All Users").evalSymlink()
+        val p = PlatformFileSystem.evalSymlink(WindowsPath.of("C:\\Users\\All Users"))
         assertEquals(WindowsPath.of("C:\\ProgramData"), p)
         println(p.toString())
     }
@@ -93,7 +93,7 @@ class WindowsPathTest {
     @Test
     fun testEvalSymlinkNotExists() {
         assertFailsWith<NoSuchFileException> {
-            WindowsPath.of("C:\\Users\\All Users11111").evalSymlink()
+            PlatformFileSystem.evalSymlink(WindowsPath.of("C:\\Users\\All Users11111"))
         }
     }
 

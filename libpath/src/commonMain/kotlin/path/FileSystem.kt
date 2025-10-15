@@ -34,8 +34,10 @@ interface FileSystem {
         var visitDirectory: Boolean
     }
 
+    fun evalSymlink(path: Path): Path
+
     fun isSameFile(path1: Path, path2: Path): Boolean {
-        return path1.evalSymlink().toAbsolute() == path2.evalSymlink().toAbsolute()
+        return evalSymlink(path1).toAbsolute() == evalSymlink(path2).toAbsolute()
     }
 
     fun openRead(path: Path): RawSource
