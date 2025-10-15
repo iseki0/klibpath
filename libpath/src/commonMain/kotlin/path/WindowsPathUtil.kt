@@ -167,17 +167,23 @@ internal data object WindowsPathUtil {
         val start: Int get() = v.toUInt().toInt()
     }
 
+    private fun putPrefix(buf: CharArray, p: Int, s: CharSequence): Int {
+        var p = p
+        for (i in s.lastIndex downTo 0) {
+            buf[p--] = s[i]
+        }
+        return p
+    }
+
     fun normalizePath(input: CharSequence, collapse: Boolean = true): String {
         if (input.isEmpty()) return ""
-        val buf = CharArray(input.length + 1)
         val props = PathProp.analyze(input)
         val start = props.start
         val isLongPath = props.isLong
         val isUncPath = props.isUNC
-        val hasDosPrefix = props.hasDosPrefix
         val isAbsolute = props.isAbs
         val isNoPath = props.isNoPath
-
+        val buf = CharArray(input.length + 9)
         if (!isAbsolute && isUncPath && !isNoPath) {
             throw invalidPath(input, "UNC path must be absolute")
         }
@@ -241,7 +247,7 @@ internal data object WindowsPathUtil {
             }
         }
 
-        // handle the prefix \, check is abs
+        // handle the prefix \, check absolute
         val alreadyWriteSlash = p + 1 <= buf.lastIndex && buf[p + 1] == '\\'
         if (isAbsolute && !alreadyWriteSlash || isNoPath) {
             buf[p--] = '\\'
@@ -249,41 +255,24 @@ internal data object WindowsPathUtil {
             buf[p++] = 0.toChar()
         }
 
-        // copy the prefix
-        for (i in start - 1 downTo 0) {
-            buf[p--] = input[i]
+        if (props.hasDosPrefix) {
+            buf[p--] = ':'
+            buf[p--] = input[start - 2].uppercaseChar() // drive letter
+            if (buf.lastIndex - p >= 260 && isAbsolute) {
+                // need to add long path prefix
+                p = putPrefix(buf, p, """\\?\""")
+            }
+        } else if (props.isUNC) {
+            // copy the UNC root without the prefix ('\\' or '\\?\UNC\')
+            val uncRootStart = if (props.isLong) 8 else 2
+            p = putPrefix(buf, p, input.subSequence(uncRootStart, start))
+            // add long path prefix if the total length >= 260 (with prefix '\\')
+            val prefix = if (buf.lastIndex - p >= 258) """\\?\UNC\""" else """\\"""
+            p = putPrefix(buf, p, prefix)
         }
-        if (hasDosPrefix && buf[p + start - 1].isLowerCase()) {
-            buf[p + start - 1] = buf[p + start - 1].uppercaseChar()
-        }
+
         val offset = p + 1
-        return buf.concatToString(offset).let(::normalizePathForInMaxPathConvention)
-    }
-
-    private fun normalizePathForInMaxPathConvention(input: CharSequence): String {
-        if (input.isEmpty()) return ""
-        val props = PathProp.analyze(input)
-        if (!props.isAbs) return input.toString()
-        if (props.isLong) {
-            if (props.isUNC) {
-                if (input.length < 264) {
-                    return '\\' + input.substring(7)
-                }
-                return input.toString()
-            }
-            if (input.length < 264) {
-                return input.substring(4)
-            }
-            return input.toString()
-        }
-        if (input.length >= 260) {
-            if (props.isUNC) {
-                return """\\?\UNC\""" + input.substring(2)
-            }
-            return """\\?\$input"""
-        }
-        return input.toString()
-
+        return buf.concatToString(offset)
     }
 
     fun getFilenameIndex(path: CharSequence): Int {
