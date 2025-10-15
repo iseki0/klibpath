@@ -16,6 +16,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class WindowsDirIteratorTest {
     @Test
@@ -53,5 +54,28 @@ class WindowsDirIteratorTest {
         assertFailsWith<NotDirectoryException> {
             WindowsDirIterator("./build.gradle.kts")
         }
+    }
+
+    private fun assertCDrive(path: String) {
+        val entries = WindowsDirIterator(path).use { it.asSequence().toList() }
+        assertTrue { entries.any { it.name == "Windows" && it.isDirectory } }
+        assertTrue { entries.any { it.name == "Program Files" && it.isDirectory } }
+        assertTrue { entries.any { it.name == "pagefile.sys" && !it.isDirectory } } // assert pagefile enabled
+    }
+
+    @Test
+    fun testReadDosRoot() {
+        assertCDrive("C:\\")
+    }
+
+    @Test
+    fun testReadDosRootRelDevice() {
+        // assert there's C: drive
+        assertCDrive("\\")
+    }
+
+    @Test
+    fun testReadDosRootLongPath() {
+        assertCDrive("\\\\?\\C:\\")
     }
 }
