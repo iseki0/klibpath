@@ -1,8 +1,7 @@
-@file:JvmName("Path")
-
 package path
 
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmStatic
 
 interface Path {
     val separator: String get() = fileSystem.separator
@@ -18,11 +17,12 @@ interface Path {
     fun normalization(): Path
     fun toAbsolute(): Path
 
-    companion object
+    companion object {
+        @JvmStatic
+        @JvmName("of")
+        operator fun invoke(path: String) = createPath(path)
+    }
 }
-
-@JvmName("of")
-fun Path(path: String): Path = createPath(path)
 
 internal expect fun createPath(path: String): Path
 
