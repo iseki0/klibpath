@@ -124,7 +124,14 @@ internal data object WindowsFileSystem : FileSystem {
     override fun openRead(path: Path): RawSource = WindowsFileSource(path.win.value).buffered()
 
     override fun openWrite(path: Path): RawSink =
-        WindowsFileSink(path.win.value, create = true, createNew = false, truncate = false)
+        openWrite(path, create = true, createNew = false, truncate = false)
+
+    override fun openWrite(
+        path: Path,
+        create: Boolean,
+        createNew: Boolean,
+        truncate: Boolean,
+    ): RawSink = WindowsFileSink(path.win.value, create, createNew, truncate)
 
     override fun mkdir(path: Path) {
         if (CreateDirectoryW(path.win.value, null) == FALSE) {

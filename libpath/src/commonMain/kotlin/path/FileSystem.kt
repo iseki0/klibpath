@@ -43,9 +43,13 @@ interface FileSystem {
     fun openRead(path: Path): RawSource
 
     fun getFileKey(path: Path): Any? = null
+
     fun openWrite(path: Path): RawSink
 
+    fun openWrite(path: Path, create: Boolean = true, createNew: Boolean = false, truncate: Boolean = false): RawSink
+
     fun mkdir(path: Path)
+
     fun mkdirs(path: Path)
 }
 
