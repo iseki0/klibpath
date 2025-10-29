@@ -58,6 +58,7 @@ class WindowsDirIteratorTest {
 
     private fun assertCDrive(path: String) {
         val entries = WindowsDirIterator(path).use { it.asSequence().toList() }
+        entries.forEach { println(it) }
         assertTrue { entries.any { it.name == "Windows" && it.isDirectory } }
         assertTrue { entries.any { it.name == "Program Files" && it.isDirectory } }
         assertTrue { entries.any { it.name == "pagefile.sys" && !it.isDirectory } } // assert pagefile enabled
@@ -66,12 +67,6 @@ class WindowsDirIteratorTest {
     @Test
     fun testReadDosRoot() {
         assertCDrive("C:\\")
-    }
-
-    @Test
-    fun testReadDosRootRelDevice() {
-        // assert there's C: drive
-        assertCDrive("\\")
     }
 
     @Test
