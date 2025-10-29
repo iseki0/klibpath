@@ -2,6 +2,7 @@ package path
 
 import kotlinx.io.RawSink
 import kotlinx.io.RawSource
+import kotlin.jvm.JvmStatic
 
 interface FileSystem {
     val separator: String
@@ -51,6 +52,11 @@ interface FileSystem {
     fun mkdir(path: Path)
 
     fun mkdirs(path: Path)
+
+    companion object {
+        @JvmStatic
+        fun getPlatform(): FileSystem = PlatformFileSystem
+    }
 }
 
-expect val PlatformFileSystem: FileSystem
+internal expect val PlatformFileSystem: FileSystem

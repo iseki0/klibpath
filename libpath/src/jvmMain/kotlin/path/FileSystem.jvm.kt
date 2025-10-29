@@ -1,4 +1,4 @@
 package path
 
-actual val PlatformFileSystem: FileSystem
+internal actual val PlatformFileSystem: FileSystem
     get() = TODO("Not yet implemented")
