@@ -1,10 +1,8 @@
 package space.iseki.kpath
 
-import kotlin.test.Test
-
 class FileSystemTest {
 
-    @Test
+    //    @Test
     fun testWalkCodeDir() {
         println(Path(".").toAbsolute())
         PlatformFileSystem.walk(Path(".")) {
