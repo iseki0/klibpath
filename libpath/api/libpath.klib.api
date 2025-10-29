@@ -1,0 +1,123 @@
+// Klib ABI Dump
+// Targets: [mingwX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <space.iseki.path4kt:libpath>
+abstract interface space.iseki.kpath/FileSystem { // space.iseki.kpath/FileSystem|null[0]
+    abstract val roots // space.iseki.kpath/FileSystem.roots|{}roots[0]
+        abstract fun <get-roots>(): kotlin.collections/List<space.iseki.kpath/Path> // space.iseki.kpath/FileSystem.roots.<get-roots>|<get-roots>(){}[0]
+    abstract val separator // space.iseki.kpath/FileSystem.separator|{}separator[0]
+        abstract fun <get-separator>(): kotlin/String // space.iseki.kpath/FileSystem.separator.<get-separator>|<get-separator>(){}[0]
+
+    abstract fun delete(space.iseki.kpath/Path, kotlin/Boolean = ...) // space.iseki.kpath/FileSystem.delete|delete(space.iseki.kpath.Path;kotlin.Boolean){}[0]
+    abstract fun evalSymlink(space.iseki.kpath/Path): space.iseki.kpath/Path // space.iseki.kpath/FileSystem.evalSymlink|evalSymlink(space.iseki.kpath.Path){}[0]
+    abstract fun mkdir(space.iseki.kpath/Path) // space.iseki.kpath/FileSystem.mkdir|mkdir(space.iseki.kpath.Path){}[0]
+    abstract fun mkdirs(space.iseki.kpath/Path) // space.iseki.kpath/FileSystem.mkdirs|mkdirs(space.iseki.kpath.Path){}[0]
+    abstract fun openDirectoryIterator(space.iseki.kpath/Path): space.iseki.kpath/FileSystem.DirEntryIterator // space.iseki.kpath/FileSystem.openDirectoryIterator|openDirectoryIterator(space.iseki.kpath.Path){}[0]
+    abstract fun openRead(space.iseki.kpath/Path): kotlinx.io/RawSource // space.iseki.kpath/FileSystem.openRead|openRead(space.iseki.kpath.Path){}[0]
+    abstract fun openWrite(space.iseki.kpath/Path): kotlinx.io/RawSink // space.iseki.kpath/FileSystem.openWrite|openWrite(space.iseki.kpath.Path){}[0]
+    abstract fun openWrite(space.iseki.kpath/Path, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): kotlinx.io/RawSink // space.iseki.kpath/FileSystem.openWrite|openWrite(space.iseki.kpath.Path;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    open fun getFileKey(space.iseki.kpath/Path): kotlin/Any? // space.iseki.kpath/FileSystem.getFileKey|getFileKey(space.iseki.kpath.Path){}[0]
+    open fun isSameFile(space.iseki.kpath/Path, space.iseki.kpath/Path): kotlin/Boolean // space.iseki.kpath/FileSystem.isSameFile|isSameFile(space.iseki.kpath.Path;space.iseki.kpath.Path){}[0]
+    open fun listDirectoryEntries(space.iseki.kpath/Path): kotlin.collections/List<space.iseki.kpath/FileSystem.DirEntry> // space.iseki.kpath/FileSystem.listDirectoryEntries|listDirectoryEntries(space.iseki.kpath.Path){}[0]
+    open fun walk(space.iseki.kpath/Path, kotlin/Function1<space.iseki.kpath/FileSystem.WalkOption, kotlin/Unit> = ...): space.iseki.kpath/FileSystem.Walker // space.iseki.kpath/FileSystem.walk|walk(space.iseki.kpath.Path;kotlin.Function1<space.iseki.kpath.FileSystem.WalkOption,kotlin.Unit>){}[0]
+
+    abstract interface DirEntry { // space.iseki.kpath/FileSystem.DirEntry|null[0]
+        abstract val isDirectory // space.iseki.kpath/FileSystem.DirEntry.isDirectory|{}isDirectory[0]
+            abstract fun <get-isDirectory>(): kotlin/Boolean // space.iseki.kpath/FileSystem.DirEntry.isDirectory.<get-isDirectory>|<get-isDirectory>(){}[0]
+        abstract val name // space.iseki.kpath/FileSystem.DirEntry.name|{}name[0]
+            abstract fun <get-name>(): kotlin/String // space.iseki.kpath/FileSystem.DirEntry.name.<get-name>|<get-name>(){}[0]
+    }
+
+    abstract interface DirEntryIterator : kotlin.collections/Iterator<space.iseki.kpath/FileSystem.DirEntry>, kotlin/AutoCloseable // space.iseki.kpath/FileSystem.DirEntryIterator|null[0]
+
+    abstract interface WalkOption { // space.iseki.kpath/FileSystem.WalkOption|null[0]
+        abstract var visitDirectory // space.iseki.kpath/FileSystem.WalkOption.visitDirectory|{}visitDirectory[0]
+            abstract fun <get-visitDirectory>(): kotlin/Boolean // space.iseki.kpath/FileSystem.WalkOption.visitDirectory.<get-visitDirectory>|<get-visitDirectory>(){}[0]
+            abstract fun <set-visitDirectory>(kotlin/Boolean) // space.iseki.kpath/FileSystem.WalkOption.visitDirectory.<set-visitDirectory>|<set-visitDirectory>(kotlin.Boolean){}[0]
+
+        abstract fun onEnter(kotlin/Function1<space.iseki.kpath/Path, kotlin/Boolean>) // space.iseki.kpath/FileSystem.WalkOption.onEnter|onEnter(kotlin.Function1<space.iseki.kpath.Path,kotlin.Boolean>){}[0]
+        abstract fun onLeave(kotlin/Function1<space.iseki.kpath/Path, kotlin/Unit>) // space.iseki.kpath/FileSystem.WalkOption.onLeave|onLeave(kotlin.Function1<space.iseki.kpath.Path,kotlin.Unit>){}[0]
+    }
+
+    abstract interface Walker : kotlin.collections/Iterator<space.iseki.kpath/Path>, kotlin/AutoCloseable // space.iseki.kpath/FileSystem.Walker|null[0]
+
+    final object Companion { // space.iseki.kpath/FileSystem.Companion|null[0]
+        final fun platform(): space.iseki.kpath/FileSystem // space.iseki.kpath/FileSystem.Companion.platform|platform(){}[0]
+    }
+}
+
+abstract interface space.iseki.kpath/Path { // space.iseki.kpath/Path|null[0]
+    abstract val fileSystem // space.iseki.kpath/Path.fileSystem|{}fileSystem[0]
+        abstract fun <get-fileSystem>(): space.iseki.kpath/FileSystem // space.iseki.kpath/Path.fileSystem.<get-fileSystem>|<get-fileSystem>(){}[0]
+    abstract val filename // space.iseki.kpath/Path.filename|{}filename[0]
+        abstract fun <get-filename>(): kotlin/String? // space.iseki.kpath/Path.filename.<get-filename>|<get-filename>(){}[0]
+    abstract val isAbsolute // space.iseki.kpath/Path.isAbsolute|{}isAbsolute[0]
+        abstract fun <get-isAbsolute>(): kotlin/Boolean // space.iseki.kpath/Path.isAbsolute.<get-isAbsolute>|<get-isAbsolute>(){}[0]
+    abstract val parent // space.iseki.kpath/Path.parent|{}parent[0]
+        abstract fun <get-parent>(): space.iseki.kpath/Path? // space.iseki.kpath/Path.parent.<get-parent>|<get-parent>(){}[0]
+    open val extension // space.iseki.kpath/Path.extension|{}extension[0]
+        open fun <get-extension>(): kotlin/String? // space.iseki.kpath/Path.extension.<get-extension>|<get-extension>(){}[0]
+    open val separator // space.iseki.kpath/Path.separator|{}separator[0]
+        open fun <get-separator>(): kotlin/String // space.iseki.kpath/Path.separator.<get-separator>|<get-separator>(){}[0]
+
+    abstract fun join(kotlin/Array<out kotlin/String>...): space.iseki.kpath/Path // space.iseki.kpath/Path.join|join(kotlin.Array<out|kotlin.String>...){}[0]
+    abstract fun normalization(): space.iseki.kpath/Path // space.iseki.kpath/Path.normalization|normalization(){}[0]
+    abstract fun toAbsolute(): space.iseki.kpath/Path // space.iseki.kpath/Path.toAbsolute|toAbsolute(){}[0]
+    open fun join(kotlin/String): space.iseki.kpath/Path // space.iseki.kpath/Path.join|join(kotlin.String){}[0]
+
+    final object Companion { // space.iseki.kpath/Path.Companion|null[0]
+        final fun invoke(kotlin/String): space.iseki.kpath/Path // space.iseki.kpath/Path.Companion.invoke|invoke(kotlin.String){}[0]
+    }
+}
+
+final class space.iseki.kpath/AccessDeniedException : space.iseki.kpath/FileSystemException { // space.iseki.kpath/AccessDeniedException|null[0]
+    constructor <init>(kotlin/String?) // space.iseki.kpath/AccessDeniedException.<init>|<init>(kotlin.String?){}[0]
+    constructor <init>(kotlin/String?, kotlin/String?, kotlin/String?) // space.iseki.kpath/AccessDeniedException.<init>|<init>(kotlin.String?;kotlin.String?;kotlin.String?){}[0]
+}
+
+final class space.iseki.kpath/DirectoryNotEmptyException : space.iseki.kpath/FileSystemException { // space.iseki.kpath/DirectoryNotEmptyException|null[0]
+    constructor <init>(kotlin/String?) // space.iseki.kpath/DirectoryNotEmptyException.<init>|<init>(kotlin.String?){}[0]
+}
+
+final class space.iseki.kpath/FileAlreadyExistsException : space.iseki.kpath/FileSystemException { // space.iseki.kpath/FileAlreadyExistsException|null[0]
+    constructor <init>(kotlin/String?) // space.iseki.kpath/FileAlreadyExistsException.<init>|<init>(kotlin.String?){}[0]
+    constructor <init>(kotlin/String?, kotlin/String?, kotlin/String?) // space.iseki.kpath/FileAlreadyExistsException.<init>|<init>(kotlin.String?;kotlin.String?;kotlin.String?){}[0]
+}
+
+final class space.iseki.kpath/InvalidPathException : kotlin/IllegalArgumentException { // space.iseki.kpath/InvalidPathException|null[0]
+    constructor <init>(kotlin/String, kotlin/String) // space.iseki.kpath/InvalidPathException.<init>|<init>(kotlin.String;kotlin.String){}[0]
+
+    final val input // space.iseki.kpath/InvalidPathException.input|{}input[0]
+        final fun <get-input>(): kotlin/String // space.iseki.kpath/InvalidPathException.input.<get-input>|<get-input>(){}[0]
+    final val message // space.iseki.kpath/InvalidPathException.message|{}message[0]
+        final fun <get-message>(): kotlin/String? // space.iseki.kpath/InvalidPathException.message.<get-message>|<get-message>(){}[0]
+    final val reason // space.iseki.kpath/InvalidPathException.reason|{}reason[0]
+        final fun <get-reason>(): kotlin/String // space.iseki.kpath/InvalidPathException.reason.<get-reason>|<get-reason>(){}[0]
+}
+
+final class space.iseki.kpath/NoSuchFileException : space.iseki.kpath/FileSystemException { // space.iseki.kpath/NoSuchFileException|null[0]
+    constructor <init>(kotlin/String?) // space.iseki.kpath/NoSuchFileException.<init>|<init>(kotlin.String?){}[0]
+    constructor <init>(kotlin/String?, kotlin/String?, kotlin/String?) // space.iseki.kpath/NoSuchFileException.<init>|<init>(kotlin.String?;kotlin.String?;kotlin.String?){}[0]
+}
+
+final class space.iseki.kpath/NotDirectoryException : space.iseki.kpath/FileSystemException { // space.iseki.kpath/NotDirectoryException|null[0]
+    constructor <init>(kotlin/String?) // space.iseki.kpath/NotDirectoryException.<init>|<init>(kotlin.String?){}[0]
+}
+
+open class space.iseki.kpath/FileSystemException : space.iseki.kpath/IOException { // space.iseki.kpath/FileSystemException|null[0]
+    constructor <init>(kotlin/String?) // space.iseki.kpath/FileSystemException.<init>|<init>(kotlin.String?){}[0]
+    constructor <init>(kotlin/String?, kotlin/String?, kotlin/String?) // space.iseki.kpath/FileSystemException.<init>|<init>(kotlin.String?;kotlin.String?;kotlin.String?){}[0]
+
+    open val message // space.iseki.kpath/FileSystemException.message|{}message[0]
+        open fun <get-message>(): kotlin/String? // space.iseki.kpath/FileSystemException.message.<get-message>|<get-message>(){}[0]
+}
+
+open class space.iseki.kpath/IOException : kotlin/Exception { // space.iseki.kpath/IOException|null[0]
+    constructor <init>(kotlin/String?) // space.iseki.kpath/IOException.<init>|<init>(kotlin.String?){}[0]
+    constructor <init>(kotlin/String?, kotlin/Throwable?) // space.iseki.kpath/IOException.<init>|<init>(kotlin.String?;kotlin.Throwable?){}[0]
+    constructor <init>(kotlin/Throwable?) // space.iseki.kpath/IOException.<init>|<init>(kotlin.Throwable?){}[0]
+}

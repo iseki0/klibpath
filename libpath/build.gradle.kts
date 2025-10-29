@@ -1,10 +1,16 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
     multiplatform
 }
 
-@OptIn(ExperimentalKotlinGradlePluginApi::class) kotlin {
+@OptIn(ExperimentalKotlinGradlePluginApi::class, ExperimentalAbiValidation::class) kotlin {
+
+    abiValidation {
+        enabled = true
+    }
+
     jvm {}
 
 //    iosX64()
