@@ -1,6 +1,7 @@
 package space.iseki.kpath
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.IntVar
 import kotlinx.cinterop.MemScope
 import kotlinx.cinterop.UIntVar
 import kotlinx.cinterop.addressOf
@@ -11,7 +12,6 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
 import kotlinx.io.Buffer
-import kotlinx.io.RawSink
 import kotlinx.io.UnsafeIoApi
 import kotlinx.io.unsafe.UnsafeBufferOperations
 import platform.windows.CREATE_ALWAYS
@@ -22,6 +22,7 @@ import platform.windows.DWORD
 import platform.windows.ERROR_ACCESS_DENIED
 import platform.windows.FALSE
 import platform.windows.FILE_ATTRIBUTE_NORMAL
+import platform.windows.FILE_BEGIN
 import platform.windows.FILE_SHARE_DELETE
 import platform.windows.FILE_SHARE_READ
 import platform.windows.FILE_SHARE_WRITE
@@ -32,14 +33,16 @@ import platform.windows.GetLastError
 import platform.windows.HANDLE
 import platform.windows.INVALID_FILE_ATTRIBUTES
 import platform.windows.INVALID_HANDLE_VALUE
+import platform.windows.INVALID_SET_FILE_POINTER
 import platform.windows.OPEN_ALWAYS
 import platform.windows.OPEN_EXISTING
+import platform.windows.SetFilePointer
 import platform.windows.TRUNCATE_EXISTING
 import platform.windows.WriteFile
 import kotlin.math.min
 
 @OptIn(UnsafeIoApi::class, ExperimentalForeignApi::class)
-internal class WindowsFileSink(val path: String, create: Boolean, createNew: Boolean, truncate: Boolean) : RawSink {
+internal class WindowsFileSink(val path: String, create: Boolean, createNew: Boolean, truncate: Boolean) : FileSink {
     private val h: Handle
 
     init {
@@ -126,7 +129,7 @@ internal class WindowsFileSink(val path: String, create: Boolean, createNew: Boo
     }
 
     override fun write(source: Buffer, byteCount: Long) {
-        check(!h.isClosed)
+        ensureOpen()
         require(byteCount >= 0)
         if (byteCount == 0L) return
         memScoped {
@@ -141,4 +144,27 @@ internal class WindowsFileSink(val path: String, create: Boolean, createNew: Boo
     }
 
     override fun toString(): String = "WindowsFileSink(path=\"$path\")"
+    override fun seek(position: Long) {
+        ensureOpen()
+        require(position >= 0)
+        memScoped {
+            val high = alloc<IntVar>()
+            high.value = position.ushr(32).toInt()
+            val r = SetFilePointer(
+                hFile = h.handle,
+                lDistanceToMove = position.toInt(),
+                lpDistanceToMoveHigh = high.ptr,
+                dwMoveMethod = FILE_BEGIN.convert(),
+            )
+            if (r == INVALID_SET_FILE_POINTER) {
+                translateIOError(file = path)
+            }
+        }
+    }
+
+    private fun ensureOpen() {
+        if (h.isClosed) {
+            throw IllegalStateException("FileSink is closed: $this")
+        }
+    }
 }

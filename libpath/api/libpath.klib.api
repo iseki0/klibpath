@@ -6,6 +6,10 @@
 // - Show declarations: true
 
 // Library unique name: <space.iseki.path4kt:libpath>
+abstract interface space.iseki.kpath/FileSink : kotlinx.io/RawSink, space.iseki.kpath/Seekable // space.iseki.kpath/FileSink|null[0]
+
+abstract interface space.iseki.kpath/FileSource : kotlinx.io/RawSource, space.iseki.kpath/Seekable // space.iseki.kpath/FileSource|null[0]
+
 abstract interface space.iseki.kpath/FileSystem { // space.iseki.kpath/FileSystem|null[0]
     abstract val roots // space.iseki.kpath/FileSystem.roots|{}roots[0]
         abstract fun <get-roots>(): kotlin.collections/List<space.iseki.kpath/Path> // space.iseki.kpath/FileSystem.roots.<get-roots>|<get-roots>(){}[0]
@@ -17,9 +21,9 @@ abstract interface space.iseki.kpath/FileSystem { // space.iseki.kpath/FileSyste
     abstract fun mkdir(space.iseki.kpath/Path) // space.iseki.kpath/FileSystem.mkdir|mkdir(space.iseki.kpath.Path){}[0]
     abstract fun mkdirs(space.iseki.kpath/Path) // space.iseki.kpath/FileSystem.mkdirs|mkdirs(space.iseki.kpath.Path){}[0]
     abstract fun openDirectoryIterator(space.iseki.kpath/Path): space.iseki.kpath/FileSystem.DirEntryIterator // space.iseki.kpath/FileSystem.openDirectoryIterator|openDirectoryIterator(space.iseki.kpath.Path){}[0]
-    abstract fun openRead(space.iseki.kpath/Path): kotlinx.io/RawSource // space.iseki.kpath/FileSystem.openRead|openRead(space.iseki.kpath.Path){}[0]
-    abstract fun openWrite(space.iseki.kpath/Path): kotlinx.io/RawSink // space.iseki.kpath/FileSystem.openWrite|openWrite(space.iseki.kpath.Path){}[0]
-    abstract fun openWrite(space.iseki.kpath/Path, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): kotlinx.io/RawSink // space.iseki.kpath/FileSystem.openWrite|openWrite(space.iseki.kpath.Path;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    abstract fun openRead(space.iseki.kpath/Path): space.iseki.kpath/FileSource // space.iseki.kpath/FileSystem.openRead|openRead(space.iseki.kpath.Path){}[0]
+    abstract fun openWrite(space.iseki.kpath/Path): space.iseki.kpath/FileSink // space.iseki.kpath/FileSystem.openWrite|openWrite(space.iseki.kpath.Path){}[0]
+    abstract fun openWrite(space.iseki.kpath/Path, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): space.iseki.kpath/FileSink // space.iseki.kpath/FileSystem.openWrite|openWrite(space.iseki.kpath.Path;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
     open fun getFileKey(space.iseki.kpath/Path): kotlin/Any? // space.iseki.kpath/FileSystem.getFileKey|getFileKey(space.iseki.kpath.Path){}[0]
     open fun isSameFile(space.iseki.kpath/Path, space.iseki.kpath/Path): kotlin/Boolean // space.iseki.kpath/FileSystem.isSameFile|isSameFile(space.iseki.kpath.Path;space.iseki.kpath.Path){}[0]
     open fun listDirectoryEntries(space.iseki.kpath/Path): kotlin.collections/List<space.iseki.kpath/FileSystem.DirEntry> // space.iseki.kpath/FileSystem.listDirectoryEntries|listDirectoryEntries(space.iseki.kpath.Path){}[0]
@@ -72,6 +76,10 @@ abstract interface space.iseki.kpath/Path { // space.iseki.kpath/Path|null[0]
     final object Companion { // space.iseki.kpath/Path.Companion|null[0]
         final fun invoke(kotlin/String): space.iseki.kpath/Path // space.iseki.kpath/Path.Companion.invoke|invoke(kotlin.String){}[0]
     }
+}
+
+abstract interface space.iseki.kpath/Seekable { // space.iseki.kpath/Seekable|null[0]
+    abstract fun seek(kotlin/Long) // space.iseki.kpath/Seekable.seek|seek(kotlin.Long){}[0]
 }
 
 final class space.iseki.kpath/AccessDeniedException : space.iseki.kpath/FileSystemException { // space.iseki.kpath/AccessDeniedException|null[0]

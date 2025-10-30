@@ -1,7 +1,5 @@
 package space.iseki.kpath
 
-import kotlinx.io.RawSink
-import kotlinx.io.RawSource
 import kotlin.jvm.JvmStatic
 
 interface FileSystem {
@@ -41,13 +39,13 @@ interface FileSystem {
         return evalSymlink(path1).toAbsolute() == evalSymlink(path2).toAbsolute()
     }
 
-    fun openRead(path: Path): RawSource
+    fun openRead(path: Path): FileSource
 
     fun getFileKey(path: Path): Any? = null
 
-    fun openWrite(path: Path): RawSink
+    fun openWrite(path: Path): FileSink
 
-    fun openWrite(path: Path, create: Boolean = true, createNew: Boolean = false, truncate: Boolean = false): RawSink
+    fun openWrite(path: Path, create: Boolean = true, createNew: Boolean = false, truncate: Boolean = false): FileSink
 
     fun mkdir(path: Path)
 

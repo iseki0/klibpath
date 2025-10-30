@@ -3,6 +3,7 @@
 package space.iseki.kpath
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.IntVar
 import kotlinx.cinterop.UIntVar
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.alloc
@@ -12,28 +13,30 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
 import kotlinx.io.Buffer
-import kotlinx.io.RawSource
 import kotlinx.io.UnsafeIoApi
 import kotlinx.io.unsafe.UnsafeBufferOperations
 import platform.windows.CloseHandle
 import platform.windows.CreateFileW
 import platform.windows.ERROR_HANDLE_EOF
 import platform.windows.FALSE
+import platform.windows.FILE_BEGIN
 import platform.windows.FILE_SHARE_DELETE
 import platform.windows.FILE_SHARE_READ
 import platform.windows.FILE_SHARE_WRITE
 import platform.windows.GENERIC_READ
 import platform.windows.GetLastError
 import platform.windows.INVALID_HANDLE_VALUE
+import platform.windows.INVALID_SET_FILE_POINTER
 import platform.windows.OPEN_EXISTING
 import platform.windows.ReadFile
+import platform.windows.SetFilePointer
 import platform.windows.TRUE
 import platform.windows.WINBOOL
 import kotlin.math.min
 
 
 @OptIn(UnsafeIoApi::class)
-internal class WindowsFileSource(val path: String) : RawSource {
+internal class WindowsFileSource(val path: String) : FileSource {
     private val h: Handle
 
     init {
@@ -96,5 +99,21 @@ internal class WindowsFileSource(val path: String) : RawSource {
     }
 
     override fun toString(): String = "WindowsFileSource(path=\"$path\")"
+
+    override fun seek(position: Long) {
+        memScoped {
+            val high = alloc<IntVar>()
+            high.value = position.ushr(32).toInt()
+            val r = SetFilePointer(
+                hFile = h.handle,
+                lDistanceToMove = position.toInt(),
+                lpDistanceToMoveHigh = high.ptr,
+                dwMoveMethod = FILE_BEGIN.convert(),
+            )
+            if (r == INVALID_SET_FILE_POINTER) {
+                throw translateIOError(file = path)
+            }
+        }
+    }
 
 }

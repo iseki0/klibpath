@@ -1,3 +1,9 @@
+public abstract interface class space/iseki/kpath/FileSink : kotlinx/io/RawSink, space/iseki/kpath/Seekable {
+}
+
+public abstract interface class space/iseki/kpath/FileSource : kotlinx/io/RawSource, space/iseki/kpath/Seekable {
+}
+
 public abstract interface class space/iseki/kpath/FileSystem {
 	public static final field Companion Lspace/iseki/kpath/FileSystem$Companion;
 	public abstract fun delete (Lspace/iseki/kpath/Path;Z)V
@@ -11,10 +17,10 @@ public abstract interface class space/iseki/kpath/FileSystem {
 	public abstract fun mkdir (Lspace/iseki/kpath/Path;)V
 	public abstract fun mkdirs (Lspace/iseki/kpath/Path;)V
 	public abstract fun openDirectoryIterator (Lspace/iseki/kpath/Path;)Lspace/iseki/kpath/FileSystem$DirEntryIterator;
-	public abstract fun openRead (Lspace/iseki/kpath/Path;)Lkotlinx/io/RawSource;
-	public abstract fun openWrite (Lspace/iseki/kpath/Path;)Lkotlinx/io/RawSink;
-	public abstract fun openWrite (Lspace/iseki/kpath/Path;ZZZ)Lkotlinx/io/RawSink;
-	public static synthetic fun openWrite$default (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;ZZZILjava/lang/Object;)Lkotlinx/io/RawSink;
+	public abstract fun openRead (Lspace/iseki/kpath/Path;)Lspace/iseki/kpath/FileSource;
+	public abstract fun openWrite (Lspace/iseki/kpath/Path;)Lspace/iseki/kpath/FileSink;
+	public abstract fun openWrite (Lspace/iseki/kpath/Path;ZZZ)Lspace/iseki/kpath/FileSink;
+	public static synthetic fun openWrite$default (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;ZZZILjava/lang/Object;)Lspace/iseki/kpath/FileSink;
 	public static fun platform ()Lspace/iseki/kpath/FileSystem;
 	public fun walk (Lspace/iseki/kpath/Path;Lkotlin/jvm/functions/Function1;)Lspace/iseki/kpath/FileSystem$Walker;
 	public static synthetic fun walk$default (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/iseki/kpath/FileSystem$Walker;
@@ -29,7 +35,7 @@ public final class space/iseki/kpath/FileSystem$DefaultImpls {
 	public static fun getFileKey (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;)Ljava/lang/Object;
 	public static fun isSameFile (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;Lspace/iseki/kpath/Path;)Z
 	public static fun listDirectoryEntries (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;)Ljava/util/List;
-	public static synthetic fun openWrite$default (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;ZZZILjava/lang/Object;)Lkotlinx/io/RawSink;
+	public static synthetic fun openWrite$default (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;ZZZILjava/lang/Object;)Lspace/iseki/kpath/FileSink;
 	public static fun walk (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;Lkotlin/jvm/functions/Function1;)Lspace/iseki/kpath/FileSystem$Walker;
 	public static synthetic fun walk$default (Lspace/iseki/kpath/FileSystem;Lspace/iseki/kpath/Path;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lspace/iseki/kpath/FileSystem$Walker;
 }
@@ -75,5 +81,9 @@ public final class space/iseki/kpath/Path$DefaultImpls {
 	public static fun getExtension (Lspace/iseki/kpath/Path;)Ljava/lang/String;
 	public static fun getSeparator (Lspace/iseki/kpath/Path;)Ljava/lang/String;
 	public static fun join (Lspace/iseki/kpath/Path;Ljava/lang/String;)Lspace/iseki/kpath/Path;
+}
+
+public abstract interface class space/iseki/kpath/Seekable {
+	public abstract fun seek (J)V
 }
 
